@@ -36,6 +36,15 @@ NowInOpenHarmony是一个专为OpenHarmony生态开发的新闻资讯聚合应�
 
 ## 📺 运行演示
 
+![6eb13c6db4aaee7af4d4fc2ef0a5c94b](https://github.com/user-attachments/assets/28c12c9a-3542-450f-a9b6-a2466993afe6)
+![5b313f43cc21ed6270631fda8fbbca07](https://github.com/user-attachments/assets/22fbbd63-38c5-4506-ae64-dcabf63793db)
+![291603364f8f870fe778ad3fa785390c](https://github.com/user-attachments/assets/c6a9311d-f052-4df9-82bc-d3274572c4d5)
+![35c321c50b8a2beeb3f3060eaaf5af89](https://github.com/user-attachments/assets/7109acec-b666-410f-aab5-a8c52636c5e6)
+![9547a1ccb9a606ce7cbf6154ac93325f](https://github.com/user-attachments/assets/4213de68-adda-466d-8cbb-73ac86e7260e)
+![e52879644a4befe5c633b871e9c4ccea](https://github.com/user-attachments/assets/c98fa631-06d1-4b05-b937-2202cad595b3)
+![2a504ed8e9291aed00630a20b16df5c1](https://github.com/user-attachments/assets/837bf8b7-145e-4fa4-a30c-81b78718a4d6)
+![9a062ed6eb6c335c6a800dbc43ef0912](https://github.com/user-attachments/assets/908dd80a-90bd-45a7-9ad9-eb05515bc3d7)
+
 ## 🚀 功能特性
 
 ### 📊 数据聚合
