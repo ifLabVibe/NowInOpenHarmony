@@ -1038,7 +1038,7 @@ Made with ❤️ by [XBXyftx](https://github.com/XBXyftx)
 
 ## 📝 更新日志
 
-### 🆕 最新版本更新 (关联 Issue #207)
+### 🆕 最新版本更新
 
 #### ✨ 新增功能
 - **字体大小调节功能**
@@ -1053,3 +1053,11 @@ Made with ❤️ by [XBXyftx](https://github.com/XBXyftx)
 - **数据源扩展**
   - 服务端的数据源增加了更多的OpenHarmony官方公众号的博客文章
   - 丰富了数据源的数据量以及数据种类
+ 
+![22d5d3c9e2b7f966ca48a9842f27d09b](https://github.com/user-attachments/assets/5f928fe2-ca8e-418d-bf08-73c4ad34bc32)
+![75ac68e6ffeb38eb6e0aca4e11f17ae5](https://github.com/user-attachments/assets/fb87a26c-2690-42c8-ba05-fd79ed1ac4a1)
+![cf4879fb7104a0ad7d7e47aa9ca9bcd7](https://github.com/user-attachments/assets/9b08ff0d-cf2c-4085-ac01-f0b652b06eaa)
+![dbb722f9c58a4e330a7d2d6554d34ff0](https://github.com/user-attachments/assets/514530de-5f27-41e5-b152-ee2e80f7078e)
+
+
+
