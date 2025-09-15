@@ -22,7 +22,7 @@ import {
   NAV_DESTS,
   NAV_PATH_STUCK,
 } from 'common'
-import { ColorModChoseButton } from 'feature'
+import { ColorModChoseButton, FontSizeAdjustButton } from 'feature'
 import { MainPage } from './nav_pages/MainPage'
 import { deviceInfo } from '@kit.BasicServicesKit'
 import { ArticlePage } from './nav_pages/ArticlePage'
@@ -92,7 +92,7 @@ struct Main {
   NavDestMap(name: string) {
     if (name === NAV_DESTS.MAIN) {
       Main()
-    }else if (name === NAV_DESTS.ARTICLE) {
+    } else if (name === NAV_DESTS.ARTICLE) {
       ArticlePage()
     }
   }
@@ -132,6 +132,9 @@ struct Main {
       .navBarWidth('40%')
 
       ColorModChoseButton()
+        .position({ right: this.deviceType === DEVICE_TYPES.PHONE ? 20 : 30, bottom: 160 })
+
+      FontSizeAdjustButton()
         .position({ right: this.deviceType === DEVICE_TYPES.PHONE ? 20 : 30, bottom: 100 })
     }
   }

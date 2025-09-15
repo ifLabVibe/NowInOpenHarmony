@@ -25,7 +25,7 @@ const EntryAbility_LOG_TAG = 'EntryAbility: '
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
-    appInit.initAll(this.context,this.context.getApplicationContext())
+    appInit.initAll(this.context, this.context.getApplicationContext())
   }
 
   onDestroy(): void {

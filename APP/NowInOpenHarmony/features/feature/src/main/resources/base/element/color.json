@@ -59,6 +59,50 @@
     {
       "name": "article_info_builder_bg",
       "value": "#CDFFFFFF"
+    },
+    {
+      "name": "font_adjust_dialog_bg",
+      "value": "#FFFFFFFF"
+    },
+    {
+      "name": "font_adjust_dialog_title",
+      "value": "#FF000000"
+    },
+    {
+      "name": "font_adjust_dialog_text",
+      "value": "#FF333333"
+    },
+    {
+      "name": "font_adjust_dialog_border",
+      "value": "#FFCCCCCC"
+    },
+    {
+      "name": "font_adjust_cancel_bg",
+      "value": "#00FFFFFF"
+    },
+    {
+      "name": "font_adjust_cancel_text",
+      "value": "#FF666666"
+    },
+    {
+      "name": "font_adjust_confirm_bg",
+      "value": "#FF007DFF"
+    },
+    {
+      "name": "font_adjust_confirm_text",
+      "value": "#FFFFFFFF"
+    },
+    {
+      "name": "font_adjust_sheet_bg",
+      "value": "#FFFFFFFF"
+    },
+    {
+      "name": "font_adjust_slider_track",
+      "value": "#FFE5E5E5"
+    },
+    {
+      "name": "font_adjust_slider_selected",
+      "value": "#FF007DFF"
     }
   ]
 }

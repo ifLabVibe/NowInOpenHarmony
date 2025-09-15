@@ -19,8 +19,9 @@ import { deviceInfo } from '@kit.BasicServicesKit'
 
 @ComponentV2
 export struct ArticlePage {
-  @Local baseFontSize: number = AppStorageV2.connect(UserConfigViewModel, GET_USER_CONFIG)!.fontSize
-  @Local article:NewsArticle = {
+  @Local userConfig: UserConfigViewModel =
+    AppStorageV2.connect(UserConfigViewModel, GET_USER_CONFIG, () => new UserConfigViewModel())!
+  @Local article: NewsArticle = {
     id: '',
     title: '',
     date: '',
@@ -29,14 +30,15 @@ export struct ArticlePage {
   }
   @Local deviceType: DEVICE_TYPES =
     deviceInfo.deviceType === DEVICE_TYPES.PHONE ? DEVICE_TYPES.PHONE : DEVICE_TYPES.TABLET
+
   build() {
     NavDestination() {
-      Column(){
-        Column(){
-          NewsArticleView({article:this.article,baseFontSize:this.baseFontSize})
+      Column() {
+        Column() {
+          NewsArticleView({ article: this.article, baseFontSize: this.userConfig.fontSize })
             .width('100%')
         }
-        .width(this.deviceType === DEVICE_TYPES.PHONE ?'100%':'90%')
+        .width(this.deviceType === DEVICE_TYPES.PHONE ? '100%' : '90%')
         .height('100%')
       }
       .width('100%')
@@ -51,7 +53,7 @@ export struct ArticlePage {
       ]
     })
     .borderRadius(20)
-    .onReady((navDestinationContext:NavDestinationContext)=>{
+    .onReady((navDestinationContext: NavDestinationContext) => {
       this.article = navDestinationContext.pathInfo.param as NewsArticle
     })
     .width('100%')

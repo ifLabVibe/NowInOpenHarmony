@@ -52,13 +52,14 @@ export class AppInit {
     await newsManager.updateNewsListToDB()
     await newsManager.updateNewsSwiperToDB()
   }
-  markDownConfigInit(){
-    let baseFontSize =  AppStorageV2.connect(UserConfigViewModel, GET_USER_CONFIG, () => new UserConfigViewModel())!.fontSize
+
+  markDownConfigInit() {
+    let baseFontSize =
+      AppStorageV2.connect(UserConfigViewModel, GET_USER_CONFIG, () => new UserConfigViewModel())!.fontSize
     lvCode.setIndexState(true)
     lvText.setTextSize(baseFontSize)
     logger.info(`${AppInit_LOG_TAG}Markdown初始化成功`)
   }
-
 }
 
 export const appInit = new AppInit()
