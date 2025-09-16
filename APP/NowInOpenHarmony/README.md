@@ -39,7 +39,9 @@ Server/
 ├── services/              # 业务逻辑层
 │   ├── news_service.py           # 新闻服务统一管理
 │   ├── openharmony_crawler.py   # OpenHarmony官网爬虫
-│   └── csdn_openharmony_crawler.py # CSDN爬虫
+│   ├── openharmony_blog_crawler.py # OpenHarmony技术博客爬虫
+│   ├── mobile_banner_crawler.py  # 移动端轮播图爬虫
+│   └── enhanced_mobile_banner_crawler.py # 增强版轮播图爬虫
 ├── types/                 # TypeScript类型定义
 │   └── news.ts           # 前端数据类型
 └── logs/                  # 应用日志目录
@@ -143,7 +145,9 @@ graph TB
 #### 1. 技术栈
 - **开发语言**: ArkTS
 - **网络请求**: @ohos/axios 2.2.6 - HTTP客户端库
-- **Markdown渲染**: @lidary/markdown 2.0.4 - 代码内容渲染
+- **Markdown渲染**: @lidary/markdown 2.0.4 和 @luvi/lv-markdown-in 2.0.15 - 代码内容渲染
+- **UI骨架屏**: @hw-agconnect/ui-skeleton 1.0.0 - 加载状态UI组件
+- **测试框架**: @ohos/hypium 1.0.21 和 @ohos/hamock 1.0.0 - 单元测试和模拟
 - **数据存储**: 
   - KV数据库 (Key-Value存储)
   - Preferences (轻量级偏好设置)
@@ -163,9 +167,11 @@ graph TB
 │   └── src/main/
 │       ├── ets/                   # ArkTS源码目录
 │       │   ├── entryability/      # 应用生命周期管理
+│       │   ├── entrybackupability/ # 备份能力管理
 │       │   ├── pages/             # 页面文件
 │       │   │   ├── StartPage.ets  # 启动页
-│       │   │   └── Index.ets      # 主页面
+│       │   │   └── nav_pages/     # 导航页面目录
+│       │   │       └── MainPage.ets   # 主页面
 │       │   └── init/              # 应用初始化
 │       ├── module.json5           # 模块配置
 │       └── resources/             # 模块资源文件
@@ -191,13 +197,13 @@ graph TB
 └── features/feature/              # 功能特性模块 (HSP共享包)
     └── src/main/ets/
         ├── components/            # UI组件库
-        │   ├── mainPageComponents/# 主页面组件
+        │   ├── NewsComponents/    # 新闻相关组件
         │   │   ├── NewsList.ets   # 新闻列表组件
         │   │   └── NewsSwiper.ets # 新闻轮播组件
         │   └── ConfigeComponents/ # 配置页面组件
+        │       └── ColorModChoseButton.ets # 主题切换按钮
         ├── managers/              # 业务管理器
         │   ├── NewsManager.ets    # 新闻数据管理
-        │   ├── UserConfigManager.ets # 用户配置管理
         │   └── ColorModManager.ets   # 主题模式管理
         ├── pages/                 # 功能页面
         │   └── Index.ets          # 功能首页
@@ -465,7 +471,8 @@ sequenceDiagram
 
 ### 核心功能
 - ✅ OpenHarmony新闻聚合展示
-- ✅ 多数据源新闻抓取 (官网、CSDN等)
+- ✅ 多数据源新闻抓取 (官网、技术博客等)
+- ✅ 轮播图数据获取和展示
 - ✅ 响应式多设备适配
 - ✅ 深色/浅色主题切换
 - ✅ 离线数据缓存支持
