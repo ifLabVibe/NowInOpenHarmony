@@ -15,9 +15,10 @@
 
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { window } from '@kit.ArkUI';
+import { AppStorageV2, window } from '@kit.ArkUI';
 import { appInit } from '../init/AppInit';
 import { userConfigManager } from 'feature';
+import { WINDOW_WIDTH, WinWidth } from 'common';
 
 const DOMAIN = 0x0000;
 const EntryAbility_LOG_TAG = 'EntryAbility: '
@@ -35,6 +36,10 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
+    window.getLastWindow(this.context).then((win) => {
+      const winWidth = win.getWindowProperties().windowRect.width
+      AppStorageV2.connect(WinWidth, WINDOW_WIDTH, () => new WinWidth(winWidth))
+    })
     windowStage.loadContent('pages/StartPage', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));

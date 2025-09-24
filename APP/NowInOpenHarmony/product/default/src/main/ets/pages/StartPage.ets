@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { promptAction, Router } from "@kit.ArkUI"
+import { AppStorageV2, promptAction, Router, window } from "@kit.ArkUI"
 import {
-  logger, NewsArticle, NewsListAPI, ServerHealthAPI
+  logger, NewsArticle, NewsListAPI, ServerHealthAPI, WINDOW_WIDTH, WinWidth
 } from "common"
 
 const START_PAGE_TAGE = 'StartPage:  '
@@ -23,8 +23,15 @@ const START_PAGE_TAGE = 'StartPage:  '
 @ComponentV2
 struct StarPage {
   uiRouter: Router = this.getUIContext().getRouter()
+  @Local winWidth: number = 0
+  @Local fontsize: number = 0
 
   async aboutToAppear(): Promise<void> {
+    window.getLastWindow(this.getUIContext().getHostContext())
+    const width: number = (AppStorageV2.connect(WinWidth, WINDOW_WIDTH)?.value) ?? 350
+    this.winWidth = this.getUIContext().px2vp(width)
+    logger.debug(`${START_PAGE_TAGE}winWidth: ${this.winWidth}`)
+    this.updateFontSize()
     let isServerReady: boolean = false
     setTimeout(() => {
       logger.debug(START_PAGE_TAGE + '延时跳转')
@@ -60,17 +67,22 @@ struct StarPage {
       .slide(SlideEffect.Left)
   }
 
+  updateFontSize() {
+    const num = 16
+    this.fontsize = (Math.floor((this.winWidth) / num)) + 20
+  }
+
   build() {
 
     Column() {
       Image($r('app.media.logo'))
         .width('20%')
         .margin({ bottom: 100 })
-      Text('Welcome')
-        .fontSize(30)
+      Text('Welcome To')
+        .fontSize((this.fontsize * 0.8))
         .fontColor('#ff00be53')
       Text('NowInOpenHarmony')
-        .fontSize(50)
+        .fontSize(this.fontsize)
         .fontColor('#ff00be53')
         .fontWeight(700)
     }

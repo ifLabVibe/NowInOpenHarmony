@@ -31,3 +31,18 @@ export class UserConfigViewModel {
    */
   @Trace fontSize: number = 16
 }
+
+@ObservedV2
+/**
+ * 屏幕宽度包装类
+ */
+export class WinWidth {
+  /**
+   * 屏幕宽度值
+   */
+  @Trace value: number
+
+  constructor(value: number) {
+    this.value = value
+  }
+}
