@@ -120,23 +120,25 @@ uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 5. **定时更新**: 每30分钟后台线程更新数据，遵循相同的精细状态管理
 6. **非阻塞响应**: 整个过程中API接口始终可正常响应请求
 
-### 测试缓存机制
+### 测试和监控
 ```bash
-# 测试日期解析功能
-python test_date_parsing.py
+# 健康检查
+curl http://localhost:8001/health
 
-# 测试多线程爬虫效果
-python test_threading.py
+# 查看API文档
+curl http://localhost:8001/docs
 
-# 测试精细状态管理
-python test_fine_grained_status.py
+# 查看服务状态详情
+curl http://localhost:8001/api/news/status/info
 
-# 演示多线程改进效果
-python demo_threading_improvement.py
+# 手动触发数据爬取
+curl -X POST http://localhost:8001/api/news/crawl
 
-# 演示精细状态管理
-python demo_fine_grained_status.py
+# 查看应用日志
+tail -f logs/app.log
 ```
+
+**注意**: 测试套件已精简，移除了冗余的测试文件以简化测试流程。核心测试功能通过API端点直接验证。
 
 ## 配置说明
 
@@ -207,7 +209,6 @@ Server/
 ├── downloads/              # 下载文件目录（图片等）
 ├── main.py                 # FastAPI应用入口
 ├── run.py                  # 增强版启动脚本（IP检测等）
-├── test_date_parsing.py    # 日期解析测试脚本
 ├── requirements.txt        # Python依赖
 ├── Dockerfile             # Docker镜像配置
 ├── docker-compose.yml     # 容器编排配置
