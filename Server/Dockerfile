@@ -20,7 +20,12 @@ WORKDIR /app
 # 设置环境变量
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app \
+    HOST=0.0.0.0 \
+    PORT=8001
+
+# 创建非特权用户
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # 安装系统依赖
 RUN apt-get update \
@@ -28,26 +33,32 @@ RUN apt-get update \
         gcc \
         g++ \
         curl \
-    && rm -rf /var/lib/apt/lists/*
+        chromium \
+        chromium-driver \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# 复制依赖文件
+# 复制依赖文件并安装Python依赖
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
+# 创建必要的目录
+RUN mkdir -p logs data \
+    && chown -R appuser:appuser /app
 
 # 复制应用代码
-COPY . .
-
-# 创建日志目录
-RUN mkdir -p logs
+COPY --chown=appuser:appuser . .
 
 # 暴露端口
 EXPOSE 8001
 
 # 健康检查
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8001/health || exit 1
+
+# 切换到非特权用户
+USER appuser
 
 # 启动命令
 CMD ["python", "run.py"] 

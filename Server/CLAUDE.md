@@ -8,10 +8,25 @@ NowInOpenHarmony Server is a Python-based backend service that aggregates OpenHa
 
 ## Common Development Tasks
 
+### Environment Setup
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Create virtual environment (recommended)
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/Mac:
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 ### Running the Server
 
 ```bash
-# Development server with enhanced startup script
+# Development server with enhanced startup script (recommended)
 python run.py
 
 # Direct FastAPI development server with hot reload
@@ -22,24 +37,62 @@ docker-compose up -d
 docker-compose down
 ```
 
-### Testing
+### Testing and Quality Assurance
 
 ```bash
-# Test date parsing functionality
-python test_date_parsing.py
-
 # Manual API testing - service endpoints
 http://localhost:8001/health          # Health check with cache status
 http://localhost:8001/docs            # Swagger UI documentation
 http://localhost:8001/redoc           # ReDoc documentation
+
+# Test specific crawler functionality manually
+# Note: Currently no automated test suite exists
+```
+
+### Environment Configuration
+
+```bash
+# Environment variables (can be set via .env file or system environment)
+HOST=0.0.0.0                         # Server bind address
+PORT=8001                            # Server port
+DATABASE_URL=sqlite:///./openharmony_news.db  # Database connection
+LOG_LEVEL=INFO                       # Logging level (DEBUG, INFO, WARNING, ERROR)
+ENABLE_SCHEDULER=true                # Enable background task scheduler
+```
+
+### Docker Deployment
+
+```bash
+# 完整Docker部署 - 使用部署脚本（推荐）
+./deploy.sh install          # 初始化部署环境
+./deploy.sh start            # 启动开发环境
+./deploy.sh start prod       # 启动生产环境
+./deploy.sh status           # 查看服务状态
+./deploy.sh logs app         # 查看应用日志
+./deploy.sh health           # 健康检查
+./deploy.sh stop             # 停止服务
+
+# 手动Docker部署
+docker-compose up -d                    # 开发环境部署
+docker-compose -f docker-compose.prod.yml up -d  # 生产环境部署
+docker-compose down                     # 停止服务
+docker-compose logs -f app              # 查看日志
+
+# Docker镜像构建
+docker build -t openharmony-server .
+docker run -p 8001:8001 openharmony-server
 ```
 
 ### Database Management
 
 ```bash
 # Database is automatically initialized on startup
-# SQLite file location: ./openharmony_news.db
+# SQLite file location: ./data/openharmony_news.db (Docker volume)
 # For PostgreSQL, update DATABASE_URL in .env file
+
+# Docker数据库管理
+docker-compose exec postgres psql -U postgres -d openharmony_news
+./deploy.sh backup           # 数据备份
 ```
 
 ## Architecture Overview
