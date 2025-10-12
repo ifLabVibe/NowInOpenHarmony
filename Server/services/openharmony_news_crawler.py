@@ -2,9 +2,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@ import time
 from urllib.parse import urljoin
 from datetime import datetime
 
-class OpenHarmonyCrawler:
+class OpenHarmonyNewsCrawler:
     def __init__(self):
         self.base_url = "https://www.openharmony.cn"
         self.source = "OpenHarmony"
@@ -90,7 +90,7 @@ class OpenHarmonyCrawler:
             page_num += 1
             time.sleep(0.3)  # 减少等待时间，从0.5秒降到0.3秒
 
-        print(f"📋 共获取到{len(all_infos)}条有效文章信息")
+        print(f"📋 共���取到{len(all_infos)}条有效文章信息")
 
         # 快速有效性校验（只检查前10个URL，如果大部分有效就认为全部有效）
         print("🔍 进行快速有效性校验...")
@@ -223,24 +223,24 @@ class OpenHarmonyCrawler:
     def crawl_openharmony_news(self, batch_callback=None, batch_size=20):
         import logging
         logger = logging.getLogger(__name__)
-        
+
         logger.info("🌐 开始爬取OpenHarmony官网新闻...")
         if batch_callback:
             logger.info(f"📦 启用分批处理模式，每 {batch_size} 篇文章执行一次回调")
-        
+
         articles_info = self.get_all_article_infos()
         logger.info(f"📋 获取到 {len(articles_info)} 篇文章信息")
-        
+
         all_articles_data = []
         batch_articles = []
-        
+
         for i, info in enumerate(articles_info):
             title = info["title"]
             date = info["date"]
             article_url = info["url"]
             logger.info(f"🔍 正在处理第 {i+1}/{len(articles_info)} 篇文章: {title}")
             logger.debug(f"🔗 文章URL: {article_url}")
-            
+
             article_data = self.parse_article_content(article_url)
             if article_data:
                 article_info = self._format_article({
@@ -252,7 +252,7 @@ class OpenHarmonyCrawler:
                 all_articles_data.append(article_info)
                 batch_articles.append(article_info)
                 logger.info(f"✅ 成功解析文章，共 {len(article_data)} 个内容块")
-                
+
                 # 检查是否达到批处理大小
                 if len(batch_articles) >= batch_size and batch_callback:
                     try:
@@ -265,7 +265,7 @@ class OpenHarmonyCrawler:
             else:
                 logger.warning(f"⚠️ 文章内容解析失败: {title}")
             time.sleep(1)
-        
+
         # 处理剩余的批次
         if batch_articles and batch_callback:
             try:
@@ -274,7 +274,7 @@ class OpenHarmonyCrawler:
                 logger.info(f"✅ [分批处理] 最后批次处理完成")
             except Exception as callback_e:
                 logger.error(f"❌ [分批处理] 最后批次处理失败: {callback_e}")
-        
+
         logger.info(f"🎉 OpenHarmony官网爬取完成，共处理 {len(all_articles_data)} 篇文章")
         return all_articles_data
 
@@ -283,7 +283,7 @@ def main():
     print("注意：此脚本需要安装以下依赖:")
     print("  pip install requests beautifulsoup4")
     print("-" * 50)
-    crawler = OpenHarmonyCrawler()
+    crawler = OpenHarmonyNewsCrawler()
     try:
         results = crawler.crawl_openharmony_news()
         if results:

@@ -15,7 +15,7 @@ import logging
 from typing import List, Dict, Optional
 from enum import Enum
 
-from .openharmony_crawler import OpenHarmonyCrawler
+from .openharmony_news_crawler import OpenHarmonyNewsCrawler
 from .openharmony_blog_crawler import OpenHarmonyBlogCrawler
 
 logger = logging.getLogger(__name__)
@@ -29,9 +29,9 @@ class NewsService:
     """
     统一的新闻服务类，管理多个新闻源的爬取和数据格式化
     """
-    
+
     def __init__(self):
-        self.openharmony_crawler = OpenHarmonyCrawler()
+        self.openharmony_crawler = OpenHarmonyNewsCrawler()
         self.openharmony_blog_crawler = OpenHarmonyBlogCrawler()
     
     def crawl_news(self, source: NewsSource = NewsSource.ALL) -> List[Dict]:

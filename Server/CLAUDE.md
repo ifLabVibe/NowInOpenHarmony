@@ -105,7 +105,7 @@ docker-compose exec postgres psql -U postgres -d openharmony_news
 
 2. **Service Layer** (`services/`): Business logic and data aggregation
    - `news_service.py`: Unified news service managing multiple sources
-   - `openharmony_crawler.py`: Official OpenHarmony website scraper
+   - `openharmony_news_crawler.py`: Official OpenHarmony website news scraper
    - `openharmony_blog_crawler.py`: Technical blog scraper
    - `mobile_banner_crawler.py`: Mobile banner scraper
 

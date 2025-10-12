@@ -16,7 +16,7 @@ from typing import List, Optional
 import logging
 from datetime import datetime
 
-from services.openharmony_crawler import OpenHarmonyCrawler
+from services.openharmony_news_crawler import OpenHarmonyNewsCrawler
 from services.news_service import get_news_service, NewsSource
 from models.news import NewsArticle, NewsResponse
 from core.database import get_db
