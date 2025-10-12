@@ -30,8 +30,8 @@ class MobileBannerCrawler:
     """
     
     def __init__(self):
-        self.base_url = "https://www.openharmony.cn"
-        self.target_url = "https://www.openharmony.cn/mainPlay"
+        self.base_url = "https://old.openharmony.cn"
+        self.target_url = "https://old.openharmony.cn/mainPlay"
         self.source = "OpenHarmony-Mobile-Banner"
         self.session = requests.Session()
         

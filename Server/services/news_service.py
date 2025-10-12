@@ -134,13 +134,13 @@ class NewsService:
                 "source": NewsSource.OPENHARMONY,
                 "name": "OpenHarmony官网",
                 "description": "OpenHarmony官方网站最新动态和新闻",
-                "base_url": "https://www.openharmony.cn"
+                "base_url": "https://old.openharmony.cn"
             },
             {
                 "source": NewsSource.OPENHARMONY_BLOG,
                 "name": "OpenHarmony技术博客",
                 "description": "OpenHarmony官网技术博客文章，深度技术分享",
-                "base_url": "https://www.openharmony.cn"
+                "base_url": "https://old.openharmony.cn"
             }
         ]
     
