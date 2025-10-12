@@ -21,7 +21,7 @@ from datetime import datetime
 
 class OpenHarmonyNewsCrawler:
     def __init__(self):
-        self.base_url = "https://www.openharmony.cn"
+        self.base_url = "https://old.openharmony.cn"
         self.source = "OpenHarmony"
         self.session = requests.Session()
         self.session.headers.update({

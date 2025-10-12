@@ -31,15 +31,15 @@ class OpenHarmonyBlogCrawler:
     """
     
     def __init__(self):
-        self.base_url = "https://www.openharmony.cn"
-        self.api_url = "https://www.openharmony.cn/backend/knowledge/secondaryPage/queryBatch"
+        self.base_url = "https://old.openharmony.cn"
+        self.api_url = "https://old.openharmony.cn/backend/knowledge/secondaryPage/queryBatch"
         self.source = "OpenHarmony技术博客"
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-            'Referer': 'https://www.openharmony.cn/',
+            'Referer': 'https://old.openharmony.cn/',
             'Cache-Control': 'no-cache'
         })
         
