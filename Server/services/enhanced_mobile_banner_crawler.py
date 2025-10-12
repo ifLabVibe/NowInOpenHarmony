@@ -79,6 +79,9 @@ class EnhancedMobileBannerCrawler:
 
         options = Options()
 
+        # Docker容器中使用Chromium
+        options.binary_location = "/usr/bin/chromium"  # 指定Chromium路径
+
         # 基本设置
         options.add_argument("--headless")  # 无头模式
         options.add_argument("--no-sandbox")
@@ -87,13 +90,14 @@ class EnhancedMobileBannerCrawler:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins")
         options.add_argument("--disable-images")  # 禁用图片加载以提高速度
+        options.add_argument("--disable-setuid-sandbox")  # Docker容器需要
 
         # 修复：使用唯一的临时目录避免冲突
         temp_dir = tempfile.gettempdir()
         unique_user_data_dir = os.path.join(temp_dir, f"chrome_user_data_{uuid.uuid4().hex[:8]}")
         options.add_argument(f"--user-data-dir={unique_user_data_dir}")
 
-        # 禁用缓存相关功能避免权限问题
+        # 禁用缓存相关功能避免���限问题
         options.add_argument("--disable-cache")
         options.add_argument("--disable-application-cache")
         options.add_argument("--disk-cache-size=0")
@@ -135,9 +139,10 @@ class EnhancedMobileBannerCrawler:
         try:
             # 配置Chrome选项
             options = self.get_webdriver_options()
-            
-            # 初始化WebDriver
-            driver = webdriver.Chrome(options=options)
+
+            # 初始化WebDriver - 指定chromium-driver路径
+            service = Service(executable_path="/usr/bin/chromedriver")
+            driver = webdriver.Chrome(service=service, options=options)
             
             # 设置页面加载超时
             driver.set_page_load_timeout(30)

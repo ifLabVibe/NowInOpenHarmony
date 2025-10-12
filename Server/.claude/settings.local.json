@@ -7,7 +7,8 @@
       "Bash(bash:*)",
       "Read(//d/AITrainingCamp/NowInOpenHarmony/**)",
       "Bash(cat:*)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
