@@ -199,24 +199,29 @@ def _crawl_mobile_banners() -> list:
     try:
         logger.info("🔄 执行Banner爬取任务")
         
-        # 优先尝试增强版爬虫
-        try:
-            logger.info("🚀 尝试使用增强版爬虫...")
-            enhanced_crawler = EnhancedMobileBannerCrawler()
-            banner_images = enhanced_crawler.crawl_mobile_banners(
-                download_images=False,  # 不下载图片，只获取URL
-                save_directory=""
-            )
-            
-            if banner_images:
-                logger.info(f"✅ 增强版爬虫成功，获取 {len(banner_images)} 张图片")
-                return banner_images
-            else:
-                logger.warning("⚠️ 增强版爬虫返回空结果，尝试传统爬虫")
+        import os
+        use_enhanced = os.getenv("BANNER_USE_ENHANCED", "true").lower() == "true"
+        
+        # 优先尝试增强版爬虫（可被环境变量禁用）
+        if use_enhanced:
+            try:
+                logger.info("🚀 尝试使用增强版爬虫...")
+                enhanced_crawler = EnhancedMobileBannerCrawler()
+                banner_images = enhanced_crawler.crawl_mobile_banners(
+                    download_images=False,  # 不下载图片，只获取URL
+                    save_directory=""
+                )
                 
-        except Exception as enhanced_error:
-            logger.warning(f"⚠️ 增强版爬虫失败: {enhanced_error}")
-            logger.info("🔄 回退到传统爬虫...")
+                if banner_images:
+                    logger.info(f"✅ 增强版爬虫成功，获取 {len(banner_images)} 张图片")
+                    return banner_images
+                else:
+                    logger.warning("⚠️ 增强版爬虫返回空结果，尝试传统爬虫")
+            except Exception as enhanced_error:
+                logger.warning(f"⚠️ 增强版爬虫失败: {enhanced_error}")
+                logger.info("🔄 回退到传统爬虫...")
+        else:
+            logger.info("⏭️ 已通过环境变量禁用增强版爬虫，直接使用传统爬虫")
         
         # 回退到传统爬虫
         try:

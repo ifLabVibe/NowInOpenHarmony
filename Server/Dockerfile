@@ -22,7 +22,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     HOST=0.0.0.0 \
-    PORT=8001
+    PORT=8001 \
+    BANNER_USE_ENHANCED=true \
+    CHROME_BIN=/usr/bin/chromium \
+    CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 # 创建非特权用户
 RUN groupadd -r appuser && useradd -r -g appuser appuser

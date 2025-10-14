@@ -145,26 +145,29 @@ class TaskScheduler:
             # 优先使用增强版爬虫，如果失败则回退到传统爬虫
             banner_info_list = []
             
+            import os
+            use_enhanced = os.getenv("BANNER_USE_ENHANCED", "true").lower() == "true"
             try:
-                # 尝试使用增强版爬虫
-                from services.enhanced_mobile_banner_crawler import EnhancedMobileBannerCrawler
-                enhanced_crawler = EnhancedMobileBannerCrawler()
-                banner_info_list = enhanced_crawler.crawl_mobile_banners(
-                    download_images=False,  # 定时任务不下载图片
-                    save_directory=""
-                )
-                logger.info(f"✅ 使用增强版爬虫成功，获取 {len(banner_info_list)} 张图片")
-                
+                if use_enhanced:
+                    # 尝试使用增强版爬虫
+                    from services.enhanced_mobile_banner_crawler import EnhancedMobileBannerCrawler
+                    enhanced_crawler = EnhancedMobileBannerCrawler()
+                    banner_info_list = enhanced_crawler.crawl_mobile_banners(
+                        download_images=False,  # 定时任务不下载图片
+                        save_directory=""
+                    )
+                    logger.info(f"✅ 使用增强版爬虫成功，获取 {len(banner_info_list)} 张图片")
+                else:
+                    logger.info("⏭️ 已通过环境变量禁用增强版爬虫，直接使用传统爬虫")
+                    raise Exception("Enhanced crawler disabled by env")
             except Exception as enhanced_error:
-                logger.warning(f"⚠️ 增强版爬虫失败，尝试传统爬虫: {enhanced_error}")
-                
-                # 回退到传统爬虫
+                logger.warning(f"⚠️ 增强版爬虫不可用或失败，尝试传统爬虫: {enhanced_error}")
+                # 回退到传统爬虫（与API一致，使用MobileBannerCrawler）
                 try:
-                    from services.openharmony_image_crawler import OpenHarmonyImageCrawler
-                    crawler = OpenHarmonyImageCrawler()
-                    banner_info_list = crawler.get_banner_image_info()
+                    from services.mobile_banner_crawler import MobileBannerCrawler
+                    crawler = MobileBannerCrawler()
+                    banner_info_list = crawler.crawl_mobile_banners(download_images=False)
                     logger.info(f"✅ 使用传统爬虫成功，获取 {len(banner_info_list)} 张图片")
-                    
                 except Exception as traditional_error:
                     logger.error(f"❌ 传统爬虫也失败: {traditional_error}")
                     raise traditional_error
