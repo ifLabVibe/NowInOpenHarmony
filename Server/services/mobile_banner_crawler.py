@@ -234,9 +234,70 @@ class MobileBannerCrawler:
                 self._debug_page_structure(soup)
             
             return unique_images
-            
+
         except Exception as e:
             logger.error(f"❌ 解析banner图片时发生错误: {e}")
+            return []
+
+    def _extract_banner_images_from_nuxt(self, html_content):
+        """从Nuxt/SSR内联脚本中提取banner图片URL（兜底方案）"""
+        try:
+            soup = BeautifulSoup(html_content, 'html.parser')
+            scripts = soup.find_all('script')
+
+            candidate_urls = []
+            url_patterns = [
+                r'https?://[^\s"\']+\.(?:png|jpe?g|gif|webp)',
+                r'/[_a-zA-Z0-9\-/]+\.(?:png|jpe?g|gif|webp)'
+            ]
+            keyword_patterns = re.compile(r'(banner|carousel|swiper|slide|hero|main|top|header)', re.IGNORECASE)
+
+            for sc in scripts:
+                text = sc.string or sc.get_text() or ''
+                if not text:
+                    continue
+                if ('__NUXT__' not in text) and ('nuxtState' not in text) and ('window.__NUXT__' not in text):
+                    # 不是nuxt状态脚本，也允许继续匹配图片URL（宽松）
+                    pass
+
+                for pat in url_patterns:
+                    for m in re.findall(pat, text):
+                        if 'data:image' in m:
+                            continue
+                        if keyword_patterns.search(m):
+                            candidate_urls.append(m)
+
+            # 去重、标准化为绝对URL
+            images = []
+            seen = set()
+            for u in candidate_urls:
+                full = urljoin(self.base_url, u)
+                if full in seen:
+                    continue
+                seen.add(full)
+                filename = os.path.basename(urlparse(full).path) or 'banner.jpg'
+                images.append({
+                    'id': f'nuxt-{len(seen)}',
+                    'url': full,
+                    'alt': '',
+                    'title': '',
+                    'filename': filename,
+                    'classes': ['nuxt-state'],
+                    'source': self.source,
+                    'extracted_at': datetime.now().isoformat(),
+                    'page_url': self.target_url,
+                    'method': 'nuxt-state'
+                })
+
+            if images:
+                logger.info(f"🎯 [Nuxt兜底] 从内联脚本提取到 {len(images)} 张可能的banner图片")
+            else:
+                logger.info("🔍 [Nuxt兜底] 未在内联脚本中提取到匹配的banner图片")
+
+            return images
+
+        except Exception as e:
+            logger.warning(f"⚠️ Nuxt兜底解析失败: {e}")
             return []
     
     def _debug_page_structure(self, soup):
@@ -427,8 +488,11 @@ class MobileBannerCrawler:
             logger.error("❌ 无法获取页面内容，爬取失败")
             return []
         
-        # 提取banner图片
-        banner_images = self.extract_banner_images(html_content)
+        # 兜底优先：尝试从Nuxt/SSR内联脚本中提取（适配动态站点）
+        banner_images = self._extract_banner_images_from_nuxt(html_content)
+        if not banner_images:
+            # 传统解析
+            banner_images = self.extract_banner_images(html_content)
         
         if not banner_images:
             logger.warning("⚠️ 未找到任何banner图片")
