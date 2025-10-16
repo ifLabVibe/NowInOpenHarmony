@@ -34,19 +34,19 @@ class TaskScheduler:
     def _setup_jobs(self):
         """设置定时任务"""
         try:
-            # 每3小时更新一次所有新闻源（用户要求优化）
+            # 每6小时更新一次所有新闻源（降低频率以减少资源与流量）
             self.scheduler.add_job(
                 lambda: self._update_cache_job(NewsSource.ALL),
-                trigger=IntervalTrigger(hours=3),
+                trigger=IntervalTrigger(hours=6),
                 id='update_cache_all',
                 name='更新所有新闻源缓存',
                 replace_existing=True
             )
             
-            # 每3小时更新一次轮播图（与新闻更新时间间隔一致）
+            # 每6小时更新一次轮播图（与新闻更新时间间隔一致）
             self.scheduler.add_job(
                 self._update_banner_cache_job,
-                trigger=IntervalTrigger(hours=3),
+                trigger=IntervalTrigger(hours=6),
                 id='update_banner_cache',
                 name='更新轮播图缓存',
                 replace_existing=True
