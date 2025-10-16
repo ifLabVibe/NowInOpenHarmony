@@ -99,6 +99,23 @@ uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 - `DELETE /api/banner/cache/clear` - 清空轮播图缓存
 - `GET /api/banner/cache` - 获取轮播图缓存详细信息
 
+## Docker 中的 Banner 爬虫
+
+- 环境变量开关：
+  - `BANNER_USE_ENHANCED`：是否启用增强版（Selenium）爬虫。默认 `true`。在受限环境可设为 `false`，强制使用传统解析。
+  - `CHROME_BIN`：自定义 Chrome/Chromium 可执行路径（如 `/usr/bin/chromium`）。
+  - `CHROMEDRIVER_PATH`：自定义 Chromedriver 路径（如 `/usr/bin/chromedriver`）。
+  - `SELENIUM_USE_USER_DATA_DIR`：是否向 Chrome 传入 `--user-data-dir`（默认 `false`）。若遇到“user data directory is already in use”错误，请保持 `false`。
+
+- 运行建议：
+  - 使用我们提供的 Dockerfile 已安装 `chromium` 与 `chromium-driver`，可直接使用增强版。
+  - 如遇到资源限制，可设置 `BANNER_USE_ENHANCED=false`，API 与定时任务会自动回退到传统爬虫。
+  - 如需 Selenium 稳定性：可在 docker-compose 中设置更大的共享内存（例如 `shm_size: 1g`），或添加 `--shm-size=1g`。
+
+- 常见问题：
+  - 错误 `session not created: probably user data directory is already in use`：默认不使用 `--user-data-dir`，并在失败时自动切换策略；如仍出现，可确认是否有并发任务，或临时关闭增强版（`BANNER_USE_ENHANCED=false`）。
+  - 找不到浏览器或驱动：通过环境变量指定 `CHROME_BIN`、`CHROMEDRIVER_PATH` 路径，或在镜像中安装对应软件包。
+
 ### 基础接口
 
 - `GET /` - 服务信息

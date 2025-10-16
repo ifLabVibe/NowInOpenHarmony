@@ -19,6 +19,7 @@ from typing import Optional
 import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 
 from .cache import get_news_cache, get_banner_cache, ServiceStatus
 from services.news_service import get_news_service, NewsSource
@@ -28,25 +29,27 @@ logger = logging.getLogger(__name__)
 class TaskScheduler:
     def __init__(self):
         self.scheduler = AsyncIOScheduler()
-        self.thread_pool = ThreadPoolExecutor(max_workers=6, thread_name_prefix="CrawlerWorker")
+        # 降低并发，避免在低配机器上打满 CPU
+        self.thread_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="CrawlerWorker")
         self._setup_jobs()
     
     def _setup_jobs(self):
         """设置定时任务"""
         try:
-            # 每3小时更新一次所有新闻源（用户要求优化）
+            # 每6小时更新一次所有新闻源（降低频率以减少资源与流量）
             self.scheduler.add_job(
                 lambda: self._update_cache_job(NewsSource.ALL),
-                trigger=IntervalTrigger(hours=3),
+                trigger=IntervalTrigger(hours=6),
                 id='update_cache_all',
                 name='更新所有新闻源缓存',
                 replace_existing=True
             )
             
-            # 每3小时更新一次轮播图（与新闻更新时间间隔一致）
+            # 每6小时更新一次轮播图（与新闻错峰：延迟10分钟启动）
+            banner_start = datetime.now() + timedelta(minutes=10)
             self.scheduler.add_job(
                 self._update_banner_cache_job,
-                trigger=IntervalTrigger(hours=3),
+                trigger=IntervalTrigger(hours=6, start_date=banner_start),
                 id='update_banner_cache',
                 name='更新轮播图缓存',
                 replace_existing=True
@@ -145,26 +148,29 @@ class TaskScheduler:
             # 优先使用增强版爬虫，如果失败则回退到传统爬虫
             banner_info_list = []
             
+            import os
+            use_enhanced = os.getenv("BANNER_USE_ENHANCED", "true").lower() == "true"
             try:
-                # 尝试使用增强版爬虫
-                from services.enhanced_mobile_banner_crawler import EnhancedMobileBannerCrawler
-                enhanced_crawler = EnhancedMobileBannerCrawler()
-                banner_info_list = enhanced_crawler.crawl_mobile_banners(
-                    download_images=False,  # 定时任务不下载图片
-                    save_directory=""
-                )
-                logger.info(f"✅ 使用增强版爬虫成功，获取 {len(banner_info_list)} 张图片")
-                
+                if use_enhanced:
+                    # 尝试使用增强版爬虫
+                    from services.enhanced_mobile_banner_crawler import EnhancedMobileBannerCrawler
+                    enhanced_crawler = EnhancedMobileBannerCrawler()
+                    banner_info_list = enhanced_crawler.crawl_mobile_banners(
+                        download_images=False,  # 定时任务不下载图片
+                        save_directory=""
+                    )
+                    logger.info(f"✅ 使用增强版爬虫成功，获取 {len(banner_info_list)} 张图片")
+                else:
+                    logger.info("⏭️ 已通过环境变量禁用增强版爬虫，直接使用传统爬虫")
+                    raise Exception("Enhanced crawler disabled by env")
             except Exception as enhanced_error:
-                logger.warning(f"⚠️ 增强版爬虫失败，尝试传统爬虫: {enhanced_error}")
-                
-                # 回退到传统爬虫
+                logger.warning(f"⚠️ 增强版爬虫不可用或失败，尝试传统爬虫: {enhanced_error}")
+                # 回退到传统爬虫（与API一致，使用MobileBannerCrawler）
                 try:
-                    from services.openharmony_image_crawler import OpenHarmonyImageCrawler
-                    crawler = OpenHarmonyImageCrawler()
-                    banner_info_list = crawler.get_banner_image_info()
+                    from services.mobile_banner_crawler import MobileBannerCrawler
+                    crawler = MobileBannerCrawler()
+                    banner_info_list = crawler.crawl_mobile_banners(download_images=False)
                     logger.info(f"✅ 使用传统爬虫成功，获取 {len(banner_info_list)} 张图片")
-                    
                 except Exception as traditional_error:
                     logger.error(f"❌ 传统爬虫也失败: {traditional_error}")
                     raise traditional_error

@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: nowinopen harmony-server:latest
+    image: openharmony-server:latest
     container_name: openharmony-api
     ports:
       - "8001:8001"
@@ -29,10 +29,16 @@ services:
       - DATABASE_URL=sqlite:///./data/openharmony_news.db
       - LOG_LEVEL=INFO
       - ENABLE_SCHEDULER=true
+      - BANNER_USE_ENHANCED=${BANNER_USE_ENHANCED:-true}
+      - CHROME_BIN=${CHROME_BIN:-/usr/bin/chromium}
+      - CHROMEDRIVER_PATH=${CHROMEDRIVER_PATH:-/usr/bin/chromedriver}
+      - SELENIUM_USE_USER_DATA_DIR=${SELENIUM_USE_USER_DATA_DIR:-false}
+      - SELENIUM_REMOTE_URL=${SELENIUM_REMOTE_URL:-http://selenium:4444/wd/hub}
       - TZ=Asia/Shanghai
     volumes:
       - app_logs:/app/logs
       - app_data:/app/data
+    shm_size: 1g
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
@@ -98,6 +104,21 @@ services:
       - nginx_logs:/var/log/nginx
     depends_on:
       - app
+    restart: unless-stopped
+    networks:
+      - openharmony_net
+
+  # 可选：独立Selenium浏览器（用于增强版轮播图爬虫）
+  selenium:
+    image: selenium/standalone-chromium:latest
+    container_name: openharmony-selenium
+    shm_size: 2g
+    environment:
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - TZ=Asia/Shanghai
+    ports:
+      - "4444:4444"
     restart: unless-stopped
     networks:
       - openharmony_net

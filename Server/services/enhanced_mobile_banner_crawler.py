@@ -20,6 +20,7 @@ import time
 import json
 import os
 import logging
+import shutil
 import requests
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
@@ -61,6 +62,12 @@ class EnhancedMobileBannerCrawler:
         self.base_url = "https://old.openharmony.cn"
         self.target_url = "https://old.openharmony.cn/mainPlay"
         self.source = "OpenHarmony-Enhanced-Mobile-Banner"
+        # 允许通过环境变量配置Chrome与驱动路径
+        self.chrome_bin_env = os.getenv("CHROME_BIN")
+        self.chromedriver_env = os.getenv("CHROMEDRIVER_PATH")
+        self._user_data_dir = None
+        # 可选：使用远程WebDriver（selenium/standalone-chromium）
+        self.remote_url = os.getenv("SELENIUM_REMOTE_URL")  # 例如 http://selenium:4444/wd/hub
         
         # 手机端User-Agent
         self.mobile_user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
@@ -79,6 +86,27 @@ class EnhancedMobileBannerCrawler:
 
         options = Options()
 
+        # 选择Chrome/Chromium二进制路径
+        def pick_chrome_bin() -> Optional[str]:
+            if self.chrome_bin_env and os.path.exists(self.chrome_bin_env):
+                return self.chrome_bin_env
+            for path in [
+                "/usr/bin/chromium",
+                "/usr/bin/chromium-browser",
+                "/usr/bin/google-chrome",
+                "/usr/bin/google-chrome-stable",
+            ]:
+                if os.path.exists(path):
+                    return path
+            return None
+
+        chrome_bin = pick_chrome_bin()
+        if chrome_bin:
+            options.binary_location = chrome_bin
+            logger.info(f"🧭 使用Chrome二进制: {chrome_bin}")
+        else:
+            logger.warning("⚠️ 未显式找到Chrome二进制，尝试由驱动自动定位")
+
         # 基本设置
         options.add_argument("--headless")  # 无头模式
         options.add_argument("--no-sandbox")
@@ -87,13 +115,27 @@ class EnhancedMobileBannerCrawler:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins")
         options.add_argument("--disable-images")  # 禁用图片加载以提高速度
+        options.add_argument("--disable-setuid-sandbox")  # Docker容器需要
+        # 调试端口设置在容器中非必需，避免端口冲突不设置
 
-        # 修复：使用唯一的临时目录避免冲突
-        temp_dir = tempfile.gettempdir()
-        unique_user_data_dir = os.path.join(temp_dir, f"chrome_user_data_{uuid.uuid4().hex[:8]}")
-        options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+        # 是否启用自定义用户目录（默认禁用，避免目录占用冲突）
+        use_user_data_dir = os.getenv("SELENIUM_USE_USER_DATA_DIR", "false").lower() == "true"
+        if use_user_data_dir:
+            temp_dir = tempfile.gettempdir()
+            self._user_data_dir = os.path.join(
+                temp_dir,
+                f"chrome_user_data_{os.getpid()}_{uuid.uuid4().hex[:8]}"
+            )
+            try:
+                os.makedirs(self._user_data_dir, exist_ok=True)
+            except Exception as e:
+                logger.warning(f"⚠️ 创建临时用户目录失败({self._user_data_dir}): {e}")
+            options.add_argument(f"--user-data-dir={self._user_data_dir}")
+            logger.info(f"📁 使用临时用户目录: {self._user_data_dir}")
+        else:
+            self._user_data_dir = None
 
-        # 禁用缓存相关功能避免权限问题
+        # 禁用缓存
         options.add_argument("--disable-cache")
         options.add_argument("--disable-application-cache")
         options.add_argument("--disk-cache-size=0")
@@ -112,10 +154,13 @@ class EnhancedMobileBannerCrawler:
         }
         options.add_experimental_option("mobileEmulation", mobile_emulation)
 
-        # 性能优化
+        # 运行稳定性与性能优化
         options.add_argument("--disable-background-timer-throttling")
         options.add_argument("--disable-backgrounding-occluded-windows")
         options.add_argument("--disable-renderer-backgrounding")
+        options.add_argument("--no-first-run")
+        options.add_argument("--no-default-browser-check")
+        options.add_argument("--disable-features=Translate,BackForwardCache")
 
         # 禁用自动化检测
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -135,9 +180,64 @@ class EnhancedMobileBannerCrawler:
         try:
             # 配置Chrome选项
             options = self.get_webdriver_options()
-            
-            # 初始化WebDriver
-            driver = webdriver.Chrome(options=options)
+
+            # 如果配置了远程WebDriver，则优先使用远程
+            if self.remote_url:
+                logger.info(f"🌐 使用远程WebDriver: {self.remote_url}")
+                try:
+                    driver = webdriver.Remote(command_executor=self.remote_url, options=options)
+                except Exception as e:
+                    logger.error(f"❌ 连接远程WebDriver失败: {e}")
+                    raise
+
+            # 否则使用本地chromedriver
+            if driver is None:
+                # 初始化WebDriver - 指定chromedriver路径（支持环境变量与常见路径）
+                def pick_chromedriver() -> Optional[str]:
+                    if self.chromedriver_env and os.path.exists(self.chromedriver_env):
+                        return self.chromedriver_env
+                    for path in [
+                        "/usr/bin/chromedriver",
+                        "/usr/lib/chromium/chromedriver",
+                        "/usr/local/bin/chromedriver",
+                    ]:
+                        if os.path.exists(path):
+                            return path
+                        return None
+
+                chromedriver_path = pick_chromedriver()
+                if chromedriver_path:
+                    logger.info(f"🧭 使用Chromedriver: {chromedriver_path}")
+                else:
+                    logger.warning("⚠️ 未显式找到Chromedriver，尝试Selenium自动定位")
+
+                service = Service(executable_path=chromedriver_path) if chromedriver_path else Service()
+                try:
+                    driver = webdriver.Chrome(service=service, options=options)
+                except WebDriverException as e:
+                    msg = str(e)
+                    logger.warning(f"⚠️ 首次启动Chrome失败: {msg}")
+                # 针对目录占用或其它异常：
+                # 1) 不使用用户目录 -> 切换为使用唯一用户目录
+                # 2) 使用了用户目录 -> 改为不使用用户目录
+                # 3) 添加兜底参数后重试
+                prev_used_user_dir = self._user_data_dir is not None
+                if prev_used_user_dir and os.path.isdir(self._user_data_dir):
+                    try:
+                        shutil.rmtree(self._user_data_dir, ignore_errors=True)
+                    except Exception:
+                        pass
+
+                # 切换策略
+                if prev_used_user_dir:
+                    os.environ["SELENIUM_USE_USER_DATA_DIR"] = "false"
+                else:
+                    os.environ["SELENIUM_USE_USER_DATA_DIR"] = "true"
+
+                options = self.get_webdriver_options()
+                options.add_argument("--single-process")  # 受限容器兜底
+                service = Service(executable_path=chromedriver_path) if chromedriver_path else Service()
+                driver = webdriver.Chrome(service=service, options=options)
             
             # 设置页面加载超时
             driver.set_page_load_timeout(30)
@@ -184,6 +284,13 @@ class EnhancedMobileBannerCrawler:
                     logger.info("🔧 已关闭WebDriver")
                 except:
                     pass
+            # 清理临时用户目录（仅当确实创建过）
+            if self._user_data_dir and os.path.isdir(self._user_data_dir):
+                try:
+                    shutil.rmtree(self._user_data_dir, ignore_errors=True)
+                    logger.info(f"🧹 已清理临时用户目录: {self._user_data_dir}")
+                except Exception as e:
+                    logger.debug(f"清理临时目录失败: {e}")
     
     def _trigger_carousel_loading(self, driver):
         """触发轮播图加载的各种方法"""
@@ -325,6 +432,21 @@ class EnhancedMobileBannerCrawler:
                     });
                 });
                 
+                // 额外：解析CSS背景图（banner常用background-image）
+                var bgSelectors = document.querySelectorAll('.el-carousel__item, .banner, .carousel, .el-carousel, [style*="background"], [class*="banner"], [class*="carousel"]');
+                bgSelectors.forEach(function(el){
+                    try {
+                        var style = window.getComputedStyle(el);
+                        var bg = style.getPropertyValue('background-image');
+                        if (bg && bg.indexOf('url(') !== -1) {
+                            var match = bg.match(/url\((['"]?)(.*?)\1\)/);
+                            if (match && match[2]) {
+                                images.push({ url: match[2], alt: '', className: el.className || '' });
+                            }
+                        }
+                    } catch(e) {}
+                });
+
                 // 查找Vue组件中的数据
                 if (window.Vue) {
                     var vueComponents = document.querySelectorAll('[data-v-7a548dc3]');
@@ -344,7 +466,7 @@ class EnhancedMobileBannerCrawler:
                     for js_img in js_result:
                         img_info = {
                             "id": f"js-{len(banner_images)}",
-                            "url": js_img.get("url", ""),
+                            "url": urljoin(self.base_url, js_img.get("url", "")),
                             "alt": js_img.get("alt", ""),
                             "title": "",
                             "filename": os.path.basename(urlparse(js_img.get("url", "")).path) or "banner_image.jpg",
@@ -576,6 +698,9 @@ class EnhancedMobileBannerCrawler:
     def _save_results(self, images: List[Dict], save_directory: str):
         """保存结果到JSON文件"""
         try:
+            # 当未指定目录时，跳过保存（API场景默认不下载）
+            if not save_directory:
+                return
             os.makedirs(save_directory, exist_ok=True)
             
             result_file = os.path.join(save_directory, "enhanced_banner_images.json")
