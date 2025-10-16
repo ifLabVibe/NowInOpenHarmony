@@ -19,6 +19,7 @@ from typing import Optional
 import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 
 from .cache import get_news_cache, get_banner_cache, ServiceStatus
 from services.news_service import get_news_service, NewsSource
@@ -28,7 +29,8 @@ logger = logging.getLogger(__name__)
 class TaskScheduler:
     def __init__(self):
         self.scheduler = AsyncIOScheduler()
-        self.thread_pool = ThreadPoolExecutor(max_workers=6, thread_name_prefix="CrawlerWorker")
+        # 降低并发，避免在低配机器上打满 CPU
+        self.thread_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="CrawlerWorker")
         self._setup_jobs()
     
     def _setup_jobs(self):
@@ -43,10 +45,11 @@ class TaskScheduler:
                 replace_existing=True
             )
             
-            # 每6小时更新一次轮播图（与新闻更新时间间隔一致）
+            # 每6小时更新一次轮播图（与新闻错峰：延迟10分钟启动）
+            banner_start = datetime.now() + timedelta(minutes=10)
             self.scheduler.add_job(
                 self._update_banner_cache_job,
-                trigger=IntervalTrigger(hours=6),
+                trigger=IntervalTrigger(hours=6, start_date=banner_start),
                 id='update_banner_cache',
                 name='更新轮播图缓存',
                 replace_existing=True

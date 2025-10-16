@@ -432,6 +432,21 @@ class EnhancedMobileBannerCrawler:
                     });
                 });
                 
+                // 额外：解析CSS背景图（banner常用background-image）
+                var bgSelectors = document.querySelectorAll('.el-carousel__item, .banner, .carousel, .el-carousel, [style*="background"], [class*="banner"], [class*="carousel"]');
+                bgSelectors.forEach(function(el){
+                    try {
+                        var style = window.getComputedStyle(el);
+                        var bg = style.getPropertyValue('background-image');
+                        if (bg && bg.indexOf('url(') !== -1) {
+                            var match = bg.match(/url\((['"]?)(.*?)\1\)/);
+                            if (match && match[2]) {
+                                images.push({ url: match[2], alt: '', className: el.className || '' });
+                            }
+                        }
+                    } catch(e) {}
+                });
+
                 // 查找Vue组件中的数据
                 if (window.Vue) {
                     var vueComponents = document.querySelectorAll('[data-v-7a548dc3]');
@@ -451,7 +466,7 @@ class EnhancedMobileBannerCrawler:
                     for js_img in js_result:
                         img_info = {
                             "id": f"js-{len(banner_images)}",
-                            "url": js_img.get("url", ""),
+                            "url": urljoin(self.base_url, js_img.get("url", "")),
                             "alt": js_img.get("alt", ""),
                             "title": "",
                             "filename": os.path.basename(urlparse(js_img.get("url", "")).path) or "banner_image.jpg",
