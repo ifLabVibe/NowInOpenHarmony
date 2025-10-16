@@ -23,8 +23,8 @@ class OpenHarmonyImageCrawler:
     """OpenHarmony官网banner图片爬虫"""
     
     def __init__(self, download_path="./downloads/images"):
-        self.base_url = "https://www.openharmony.cn"
-        self.target_url = "https://www.openharmony.cn/mainPlay/"
+        self.base_url = "https://old.openharmony.cn"
+        self.target_url = "https://old.openharmony.cn/mainPlay/"
         self.download_path = download_path
         self.session = requests.Session()
         

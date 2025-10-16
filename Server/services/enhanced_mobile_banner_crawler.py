@@ -58,8 +58,8 @@ class EnhancedMobileBannerCrawler:
     """
     
     def __init__(self):
-        self.base_url = "https://www.openharmony.cn"
-        self.target_url = "https://www.openharmony.cn/mainPlay"
+        self.base_url = "https://old.openharmony.cn"
+        self.target_url = "https://old.openharmony.cn/mainPlay"
         self.source = "OpenHarmony-Enhanced-Mobile-Banner"
         
         # 手机端User-Agent
@@ -74,8 +74,11 @@ class EnhancedMobileBannerCrawler:
     
     def get_webdriver_options(self) -> Options:
         """配置Chrome浏览器选项"""
+        import tempfile
+        import uuid
+
         options = Options()
-        
+
         # 基本设置
         options.add_argument("--headless")  # 无头模式
         options.add_argument("--no-sandbox")
@@ -84,10 +87,20 @@ class EnhancedMobileBannerCrawler:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins")
         options.add_argument("--disable-images")  # 禁用图片加载以提高速度
-        
+
+        # 修复：使用唯一的临时目录避免冲突
+        temp_dir = tempfile.gettempdir()
+        unique_user_data_dir = os.path.join(temp_dir, f"chrome_user_data_{uuid.uuid4().hex[:8]}")
+        options.add_argument(f"--user-data-dir={unique_user_data_dir}")
+
+        # 禁用缓存相关功能避免权限问题
+        options.add_argument("--disable-cache")
+        options.add_argument("--disable-application-cache")
+        options.add_argument("--disk-cache-size=0")
+
         # 手机模拟设置
         options.add_argument(f"--user-agent={self.mobile_user_agent}")
-        
+
         # 手机设备模拟
         mobile_emulation = {
             "deviceMetrics": {
@@ -98,12 +111,16 @@ class EnhancedMobileBannerCrawler:
             "userAgent": self.mobile_user_agent
         }
         options.add_experimental_option("mobileEmulation", mobile_emulation)
-        
+
         # 性能优化
         options.add_argument("--disable-background-timer-throttling")
         options.add_argument("--disable-backgrounding-occluded-windows")
         options.add_argument("--disable-renderer-backgrounding")
-        
+
+        # 禁用自动化检测
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+
         return options
     
     def crawl_with_selenium(self) -> List[Dict]:

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del:*)",
+      "Bash(python:*)",
+      "Bash(chmod:*)",
+      "Bash(bash:*)",
+      "Read(//d/AITrainingCamp/NowInOpenHarmony/**)",
+      "Bash(cat:*)",
+      "Bash(tar:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

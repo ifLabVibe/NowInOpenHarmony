@@ -200,7 +200,7 @@ Server/
 ├── services/               # 服务层（爬虫和业务逻辑）
 │   ├── __init__.py
 │   ├── news_service.py           # 新闻服务统一管理
-│   ├── openharmony_crawler.py    # OpenHarmony官网爬虫
+│   ├── openharmony_news_crawler.py    # OpenHarmony官网新闻爬虫
 │   ├── openharmony_blog_crawler.py # OpenHarmony技术博客爬虫
 │   ├── openharmony_image_crawler.py # OpenHarmony图片爬虫
 │   ├── mobile_banner_crawler.py  # 移动端轮播图爬虫（传统版）
