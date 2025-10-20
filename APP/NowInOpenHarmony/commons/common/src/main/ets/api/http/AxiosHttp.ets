@@ -26,7 +26,7 @@ export const AXIOS_HTTP_LOG_TAG = 'AxiosHttp:  '
  */
 export const axiosInstance = axios.create({
   baseURL: SERVE_BASE_ADDRESS,
-  timeout: 3000
+  timeout: 10000
 })
 
 // logger.debug('请求获取UIContext')
