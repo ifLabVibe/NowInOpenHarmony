@@ -73,19 +73,14 @@ struct Main {
   @Monitor('breakPointState.value')
   getNavMode() {
     logger.info(`${Main_LOG_TAG}this.breakPointState.getCurrentBreakPointType() = ${this.breakPointState.getCurrentBreakPointType()}`)
-    if (this.getUIContext().getMediaQuery().matchMediaSync('(orientation: landscape)').matches) {
-      logger.info(`${Main_LOG_TAG}成功匹配横屏模式`)
       if (this.breakPointState.getCurrentBreakPointType() === BreakpointEnum.xs ||
         this.breakPointState.getCurrentBreakPointType() === BreakpointEnum.sm ||
-        this.breakPointState.getCurrentBreakPointType() === BreakpointEnum.md) {
+        this.breakPointState.getCurrentBreakPointType() === BreakpointEnum.md
+      ) {
         this.navMod = NavigationMode.Stack
       } else {
         this.navMod = NavigationMode.Split
       }
-    } else if (this.getUIContext().getMediaQuery().matchMediaSync('(orientation: portrait)').matches) {
-      logger.info(`${Main_LOG_TAG}成功匹配竖屏模式`)
-      this.navMod = NavigationMode.Stack
-    }
   }
 
   @Builder

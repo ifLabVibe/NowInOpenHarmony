@@ -30,8 +30,8 @@ export class BreakpointSystem {
   private readonly breakpoints: Breakpoint[] = [
     { name: 'xs', size: 0 },     // 0vp <= width < 320vp
     { name: 'sm', size: 320 },   // 320vp <= width < 600vp
-    { name: 'md', size: 600 },   // 700vp <= width < 1040vp
-    { name: 'lg', size: 780 }    // 1040vp <= width
+    { name: 'md', size: 600 },   // 600vp <= width < 840vp
+    { name: 'lg', size: 840 }    // 840vp <= width
   ]
 
   /** 使用Set存储状态观察者（自动去重）[1](@ref)*/
